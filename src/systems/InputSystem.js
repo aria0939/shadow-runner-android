@@ -45,33 +45,44 @@ export default class InputSystem {
   }
 
   _wireEdges() {
+    // We do NOT use a separate update listener for edge detection because
+    // Phaser fires event listeners in registration order, and Player.update
+    // may fire BEFORE this listener (depending on construction order).
+    // Instead, edge detection happens lazily in the `state` getter, which
+    // is called at the start of Player.update. This guarantees edges are
+    // always detected before Player.update checks them.
+  }
+
+  // Called lazily from the `state` getter to detect edges.
+  _detectEdges() {
+    const now = this.scene.time.now;
     const jumpHeld = () => this.keys.jump.isDown || this.keys.up.isDown || this.keys.up2.isDown || this.virtual.jump;
     const dashHeld = () => this.keys.dash.isDown || this.virtual.dash;
     const pauseHeld = () => this.keys.pause.isDown;
     const restartHeld = () => this.keys.restart.isDown;
 
-    this.scene.events.on('update', () => {
-      const now = this.scene.time.now;
-      const jh = jumpHeld();
-      if (jh && !this._jumpHeldLast) this._jumpPressedAt = now;
-      this._jumpHeldLast = jh;
+    const jh = jumpHeld();
+    if (jh && !this._jumpHeldLast) this._jumpPressedAt = now;
+    this._jumpHeldLast = jh;
 
-      const dh = dashHeld();
-      if (dh && !this._dashHeldLast) this._dashPressedAt = now;
-      this._dashHeldLast = dh;
+    const dh = dashHeld();
+    if (dh && !this._dashHeldLast) this._dashPressedAt = now;
+    this._dashHeldLast = dh;
 
-      const ph = pauseHeld();
-      if (ph && !this._pausePressedLast) this._pausePressedAt = now;
-      this._pausePressedLast = ph;
+    const ph = pauseHeld();
+    if (ph && !this._pausePressedLast) this._pausePressedAt = now;
+    this._pausePressedLast = ph;
 
-      const rh = restartHeld();
-      if (rh && !this._restartPressedLast) this._restartPressedAt = now;
-      this._restartPressedLast = rh;
-    });
+    const rh = restartHeld();
+    if (rh && !this._restartPressedLast) this._restartPressedAt = now;
+    this._restartPressedLast = rh;
   }
 
-  // Continuous state — call once per frame.
+  // Continuous state — call once per frame. Also detects edges lazily so
+  // that jumpJustPressed/dashPressedSince return correct values when checked
+  // immediately after in Player.update.
   get state() {
+    this._detectEdges();
     const k = this.keys;
     const v = this.virtual;
     return {
@@ -86,7 +97,7 @@ export default class InputSystem {
 
   // Edge events — caller passes `now` (ms timestamp)
   jumpPressedSince(now, within = 200) { return now - this._jumpPressedAt <= within; }
-  jumpJustPressed(now) { return now === this._jumpPressedAt; }
+  jumpJustPressed(now) { return now - this._jumpPressedAt <= 50; }  // within 50ms
   clearJumpBuffer() { this._jumpPressedAt = -9999; }
 
   dashPressedSince(now, within = 200) { return now - this._dashPressedAt <= within; }

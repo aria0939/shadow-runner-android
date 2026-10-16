@@ -30,12 +30,13 @@ const config = {
   powerPreference: 'high-performance',
   scale: {
     // RESIZE mode: the canvas fills the entire screen (no black bars).
-    // The game adapts to the device's actual aspect ratio. Scenes must use
-    // this.scale.width / this.scale.height for positioning (they already do).
+    // The game adapts to the device's actual aspect ratio (16:9, 18:9, 19.5:9,
+    // 20:9, etc.). Scenes use this.scale.width / this.scale.height for layout.
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME.WIDTH,
     height: GAME.HEIGHT,
+    expandParent: true,
   },
   physics: {
     default: 'arcade',

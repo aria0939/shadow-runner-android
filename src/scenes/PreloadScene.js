@@ -73,7 +73,14 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   _queueAssetsFromManifest(m) {
-    // Hero sheets
+    // ---- Master hero spritesheet (single texture for all states) ----
+    if (m.hero_master) {
+      this.load.spritesheet('hero-master', 'assets/sprites/hero-master.png', {
+        frameWidth: m.hero_master.frameWidth,
+        frameHeight: m.hero_master.frameHeight,
+      });
+    }
+    // Hero sheets (kept for compatibility — not used at runtime anymore)
     for (const state in m.hero) {
       const meta = m.hero[state];
       this.load.spritesheet(`hero-${state}`, `assets/sprites/hero-${state}.png`, {
@@ -91,7 +98,6 @@ export default class PreloadScene extends Phaser.Scene {
     }
     // Tiles
     for (const fname in m.tiles) {
-      // strip .png for the key
       const key = fname.replace(/\.png$/, '');
       this.load.image(`tile-${key}`, `assets/tiles/${fname}`);
     }
@@ -123,18 +129,29 @@ export default class PreloadScene extends Phaser.Scene {
       return;
     }
 
-    // ---- Hero animations ----
-    for (const def of HERO_ANIMATIONS) {
-      const sheetKey = def.sheetKey;
-      if (!this.textures.exists(sheetKey)) continue;
-      const stateName = sheetKey.replace('hero-', ''); // 'idle', 'walk', ...
-      const count = m.hero[stateName].count;
-      this.anims.create({
-        key: def.key,
-        frames: this.anims.generateFrameNumbers(sheetKey, { start: 0, end: count - 1 }),
-        frameRate: def.frameRate,
-        repeat: def.repeat,
-      });
+    // ---- Hero animations (from master spritesheet) ----
+    // All hero animations use frames from the single 'hero-master' texture.
+    // This avoids the Phaser setTexture crash that occurs when switching
+    // between animations that use different source textures.
+    const master = m.hero_master;
+    if (master && this.textures.exists('hero-master')) {
+      for (const def of HERO_ANIMATIONS) {
+        // def.key is like 'hero-idle'. The state name is 'idle' (strip 'hero-').
+        const stateName = def.key.replace('hero-', '');
+        // Map 'crouch-hit' state name (file is hero-crouch-hit, key is hero-crouch-hit)
+        const stateKey = stateName === 'crouch-hit' ? 'crouch-hit' : stateName;
+        const stateMeta = master.states[stateKey];
+        if (!stateMeta) continue;
+        this.anims.create({
+          key: def.key,
+          frames: this.anims.generateFrameNumbers('hero-master', {
+            start: stateMeta.start,
+            end: stateMeta.start + stateMeta.count - 1,
+          }),
+          frameRate: def.frameRate,
+          repeat: def.repeat,
+        });
+      }
     }
 
     // ---- Enemy animations ----

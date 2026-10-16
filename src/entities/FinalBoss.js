@@ -42,6 +42,11 @@ export default class FinalBoss extends Phaser.Physics.Arcade.Sprite {
     this.damage = 1;
     this.scene.events.on('update', this.update, this);
     this.scene.events.once('shutdown', () => this.scene.events.off('update', this.update, this));
+    this.once(Phaser.GameObjects.Events.DESTROY, () => {
+      if (this.scene && this.scene.events) {
+        this.scene.events.off('update', this.update, this);
+      }
+    });
   }
 
   startIntro() {

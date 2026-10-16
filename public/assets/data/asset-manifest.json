@@ -386,5 +386,39 @@
       ]
     }
   },
-  "background": "backgrounds/green-valley-parallax.png"
+  "background": "backgrounds/green-valley-parallax.png",
+  "hero_master": {
+    "frameWidth": 324,
+    "frameHeight": 299,
+    "states": {
+      "idle": {
+        "start": 0,
+        "count": 8
+      },
+      "walk": {
+        "start": 8,
+        "count": 8
+      },
+      "run": {
+        "start": 16,
+        "count": 8
+      },
+      "jump": {
+        "start": 24,
+        "count": 4
+      },
+      "fall": {
+        "start": 28,
+        "count": 4
+      },
+      "crouch-hit": {
+        "start": 32,
+        "count": 4
+      },
+      "death": {
+        "start": 36,
+        "count": 4
+      }
+    }
+  }
 }

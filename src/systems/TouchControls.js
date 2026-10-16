@@ -1,8 +1,15 @@
 // src/systems/TouchControls.js
-// On-screen mobile controls. Drawn directly on the Phaser canvas (not DOM)
-// so they participate in scene scaling and rendering. Multi-touch is supported
-// via Phaser pointer tracking — each button listens to the pointer that first
-// lands on it.
+// On-screen mobile controls with a proper D-Pad on the left and action
+// buttons on the right. Multi-touch is fully supported — each button
+// tracks the pointer that first landed on it, so the player can hold
+// LEFT and tap JUMP simultaneously.
+//
+// Layout:
+//   LEFT side:  D-Pad (cross-shaped) with UP / LEFT / RIGHT / DOWN
+//   RIGHT side: JUMP (large) + DASH (medium) + RUN (small) + CROUCH (small)
+//   TOP-RIGHT:  PAUSE (small)
+//
+// All buttons are translucent and become more visible when pressed.
 
 import Phaser from 'phaser';
 import { COLORS } from '../config/constants.js';
@@ -32,59 +39,101 @@ export default class TouchControls {
   _build() {
     const W = this.scene.scale.width, H = this.scene.scale.height;
     const s = this.sizeScale;
-    const r = 64 * s;
+    // D-Pad button size — scaled to viewport height so it looks right on
+    // both phones and tablets.
+    const baseUnit = Math.min(W, H) * 0.11 * s;
+    const r = Math.max(28, baseUnit);
 
     this.container = this.scene.add.container(0, 0).setDepth(9000).setScrollFactor(0);
 
-    // Left side: LEFT / RIGHT pad
-    const leftX = r + 24, rightX = r + 24 + r * 2 + 16, padY = H - r - 36;
-    this._makeButton('left',  leftX,  padY, r, '\u25C0', '\u2190');
-    this._makeButton('right', rightX, padY, r, '\u25B6', '\u2192');
+    // ---- LEFT SIDE: D-Pad (cross layout) ----
+    // Center of the D-Pad is at (dpadCx, dpadCy)
+    const dpadCx = r + 50;
+    const dpadCy = H - r - 50;
+    const gap = r * 0.1; // small gap between buttons
 
-    // Right side: JUMP + DASH
-    const jumpX = W - r - 24, jumpY = H - r - 36;
-    const dashX = jumpX - r - 16 - r * 0.4, dashY = jumpY - r * 0.6;
-    this._makeButton('jump', jumpX, jumpY, r * 1.05, 'JUMP', '\u2191');
-    this._makeButton('dash', dashX, dashY, r * 0.85, 'DASH', '\u21C9');
+    // UP
+    this._makeCircleButton('dpadUp', dpadCx, dpadCy - r - gap, r * 0.85, '\u25B2', 'UP');
+    // DOWN
+    this._makeCircleButton('dpadDown', dpadCx, dpadCy + r + gap, r * 0.85, '\u25BC', 'DN');
+    // LEFT
+    this._makeCircleButton('dpadLeft', dpadCx - r - gap, dpadCy, r * 0.85, '\u25C0', 'LT');
+    // RIGHT
+    this._makeCircleButton('dpadRight', dpadCx + r + gap, dpadCy, r * 0.85, '\u25B6', 'RT');
 
-    // Smaller secondary: SPRINT, CROUCH
-    const sprintX = rightX + r + 14, sprintY = padY - r * 0.4;
-    this._makeButton('sprint', sprintX, sprintY, r * 0.55, 'RUN',  '\u21BB', 0.85);
-    const crouchX = leftX - r - 14, crouchY = padY - r * 0.4;
-    this._makeButton('crouch', crouchX, crouchY, r * 0.55, 'CRCH', '\u2193', 0.85);
+    // The D-Pad up/down map to jump/crouch (optional). We'll keep them as
+    // directional only — JUMP has its own button on the right.
+    // Wire D-Pad directions to the input system's virtual state.
 
-    // PAUSE button (top-right, small)
-    this._makeButton('pause', W - 50, 40, 28, 'II', 'II', 0.6, true);
+    // ---- RIGHT SIDE: Action buttons ----
+    const jumpR = r * 1.1;
+    const dashR = r * 0.9;
+    const smallR = r * 0.65;
+
+    // JUMP — bottom right (primary)
+    const jumpX = W - jumpR - 40;
+    const jumpY = H - jumpR - 50;
+    this._makeCircleButton('jump', jumpX, jumpY, jumpR, 'JUMP', '\u2191');
+
+    // DASH — above-left of JUMP
+    const dashX = jumpX - jumpR - dashR * 0.6 - 10;
+    const dashY = jumpY - jumpR * 0.3;
+    this._makeCircleButton('dash', dashX, dashY, dashR, 'DASH', '\u21C9');
+
+    // RUN — smaller, above DASH
+    const runX = dashX - dashR - smallR * 0.4 - 6;
+    const runY = dashY - dashR * 0.4;
+    this._makeCircleButton('sprint', runX, runY, smallR, 'RUN', '\u21BB', 0.85);
+
+    // CROUCH — small, left of JUMP
+    const crouchX = jumpX - jumpR - smallR * 0.4 - 6;
+    const crouchY = jumpY + jumpR * 0.3;
+    this._makeCircleButton('crouch', crouchX, crouchY, smallR, 'DN', '\u2193', 0.85);
+
+    // ---- TOP-RIGHT: PAUSE ----
+    this._makeCircleButton('pause', W - 36, 36, 24, 'II', 'II', 0.6, true);
   }
 
-  _makeButton(name, x, y, r, label, glyph, alphaMul = 1, square = false) {
-    const size = r * 2;
+  _makeCircleButton(name, x, y, r, label, glyph, alphaMul = 1, square = false) {
     const gfx = this.scene.add.graphics();
     const drawColor = COLORS.shadow;
-    const drawRing  = COLORS.shadowBright;
+    const drawRing = COLORS.shadowBright;
 
     const redraw = (pressed) => {
       gfx.clear();
-      const fillA = (pressed ? 0.55 : 0.20) * alphaMul * this.opacity;
-      const ringA = (pressed ? 1.0  : 0.55) * alphaMul * this.opacity;
-      gfx.fillStyle(0x05060a, fillA);
-      gfx.fillCircle(0, 0, r);
-      gfx.lineStyle(2, drawRing, ringA);
+      const fillA = (pressed ? 0.55 : 0.18) * alphaMul * this.opacity;
+      const ringA = (pressed ? 1.0 : 0.55) * alphaMul * this.opacity;
+      // Outer ring
+      gfx.lineStyle(2.5, drawRing, ringA);
       gfx.strokeCircle(0, 0, r);
-      gfx.fillStyle(drawColor, ringA * 0.4);
-      gfx.fillCircle(0, 0, r * 0.55);
+      // Inner fill
+      gfx.fillStyle(0x05060a, fillA);
+      gfx.fillCircle(0, 0, r - 1);
+      // Inner glow when pressed
+      if (pressed) {
+        gfx.fillStyle(drawColor, ringA * 0.5);
+        gfx.fillCircle(0, 0, r * 0.6);
+      } else {
+        gfx.fillStyle(drawColor, ringA * 0.15);
+        gfx.fillCircle(0, 0, r * 0.5);
+      }
     };
     redraw(false);
 
-    const txt = this.scene.add.text(0, -2, label, {
+    // Label text
+    const fontSize = Math.floor(r * 0.4);
+    const txt = this.scene.add.text(0, 0, label, {
       fontFamily: 'Trebuchet MS, system-ui, sans-serif',
-      fontSize: `${Math.floor(r * 0.32)}px`,
+      fontSize: `${fontSize}px`,
+      fontWeight: 'bold',
       color: '#e7e7ef',
       stroke: '#05060a',
       strokeThickness: 3,
     }).setOrigin(0.5);
 
-    const hit = this.scene.add.zone(x, y, size * 1.2, size * 1.2).setInteractive();
+    // Hit area — slightly larger than visual for easier touch
+    const hitSize = r * 2.4;
+    const hit = this.scene.add.zone(x, y, hitSize, hitSize).setInteractive();
     const container = this.scene.add.container(x, y, [gfx, txt]).setDepth(9000);
     hit.container = container;
     hit.gfx = gfx;
@@ -108,7 +157,6 @@ export default class TouchControls {
       hit.redraw();
       this._setVirtual(name, false);
     });
-    // pointerupoutside / pointermove handling — if a tracked pointer leaves
     hit.on('pointerupoutside', (pointer) => {
       if (hit.pointerId !== undefined && pointer.id !== hit.pointerId) return;
       hit.pressed = false;
@@ -123,7 +171,20 @@ export default class TouchControls {
 
   _setVirtual(name, val) {
     const v = this.input.virtual;
-    if (name in v) v[name] = val;
+    // D-Pad mappings
+    const map = {
+      dpadLeft: 'left',
+      dpadRight: 'right',
+      dpadUp: 'jump',     // D-Pad up also triggers jump (common in platformers)
+      dpadDown: 'crouch', // D-Pad down = crouch
+      jump: 'jump',
+      dash: 'dash',
+      sprint: 'sprint',
+      crouch: 'crouch',
+    };
+    if (name in map) {
+      v[map[name]] = val;
+    }
   }
 
   _onPause() {
@@ -152,7 +213,8 @@ export default class TouchControls {
   }
 
   destroy() {
-    this.container.destroy();
+    if (this.container) this.container.destroy();
     this.buttons = {};
+    this.container = null;
   }
 }

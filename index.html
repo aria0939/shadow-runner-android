@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
   />
-  <meta name="theme-color" content="#0a0a14" />
+  <meta name="theme-color" content="#05060a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -15,6 +15,7 @@
   <meta name="x5-orientation" content="landscape" />
   <meta name="fullscreen" content="yes" />
   <meta name="x5-fullscreen" content="true" />
+  <meta name="format-detection" content="telephone=no" />
   <title>Shadow Runner: Pixel Adventure</title>
   <style>
     html, body {
@@ -142,5 +143,31 @@
   </div>
 
   <script type="module" src="/src/main.js"></script>
+  <script>
+    // Force the canvas to fill the entire viewport. This handles cases where
+    // the Android WebView doesn't properly size the Phaser canvas.
+    function forceCanvasFill() {
+      const canvas = document.querySelector('#game-root canvas');
+      if (canvas) {
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+      }
+    }
+    // Run periodically for the first 5 seconds to catch canvas creation.
+    let fillAttempts = 0;
+    const fillInterval = setInterval(() => {
+      forceCanvasFill();
+      fillAttempts++;
+      if (fillAttempts > 20) clearInterval(fillInterval);
+    }, 250);
+    window.addEventListener('load', forceCanvasFill);
+    window.addEventListener('resize', forceCanvasFill);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(forceCanvasFill, 100);
+    });
+  </script>
 </body>
 </html>

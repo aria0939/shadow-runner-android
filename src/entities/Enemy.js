@@ -26,6 +26,12 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.ledgeDetector = null;
     this.scene.events.on('update', this.update, this);
     this.scene.events.once('shutdown', () => this.scene.events.off('update', this.update, this));
+    // Also clean up when this enemy is destroyed (e.g. after death animation).
+    this.once(Phaser.GameObjects.Events.DESTROY, () => {
+      if (this.scene && this.scene.events) {
+        this.scene.events.off('update', this.update, this);
+      }
+    });
   }
 
   // Override in subclasses

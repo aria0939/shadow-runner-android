@@ -30,8 +30,11 @@ const STATE = {
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
-    // Use the idle spritesheet as the base texture.
-    super(scene, x, y, 'hero-idle');
+    // Use the master spritesheet as the base texture. All hero animations
+    // reference frames from this single texture, so we never need to call
+    // setTexture() (which crashes Phaser when switching between textures
+    // that have different frame structures).
+    super(scene, x, y, 'hero-master', 0);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
@@ -91,6 +94,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Wire scene update
     this.scene.events.on('update', this.update, this);
     this.scene.events.once('shutdown', () => this.scene.events.off('update', this.update, this));
+    this.once(Phaser.GameObjects.Events.DESTROY, () => {
+      if (this.scene && this.scene.events) {
+        this.scene.events.off('update', this.update, this);
+      }
+    });
   }
 
   setInputSystem(input) { this.input = input; }
@@ -223,12 +231,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Buffer jump press
     if (this.input.jumpJustPressed(now)) {
       this.jumpBufferUntil = now + PHYSICS.jumpBuffer;
-    } else if (this.input.jumpPressedSince(now, 4)) {
-      // Already-consumed by edge, keep buffer alive
     }
 
     const wantsJump = now < this.jumpBufferUntil;
-    const canGroundJump = now < this.coyoteUntil;
+    // Check ground directly — at low frame rates, coyote time from the
+    // previous frame may have already expired even though the player is
+    // still on the ground this frame.
+    const canGroundJump = body.onFloor() || now < this.coyoteUntil;
     const canDoubleJump = this.extraJumpsUsed < this.maxExtraJumps;
 
     if (wantsJump && (canGroundJump || canDoubleJump)) {
@@ -313,10 +322,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (next !== this.state) {
       this.state = next;
       const key = heroAnimKey(next);
-      this.anims.play(key, true);
-      // _syncBodyOffset() is called every tick in update(), so the body
-      // will re-anchor on the next frame once the new animation's first
-      // frame becomes current.
+      // All hero animations use the single 'hero-master' texture, so we can
+      // play them directly without any setTexture() calls.
+      if (this.anims.exists(key)) {
+        this.anims.play(key, true);
+      }
     }
 
     // Hit flicker
@@ -493,7 +503,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.health = 0;
     this.body.setVelocity(0, -360);
     this.body.setAllowGravity(true);
-    this.anims.play('hero-death', true);
+    if (this.anims.exists('hero-death')) {
+      this.anims.play('hero-death', true);
+    }
     AudioSystem.play('death');
     if (this.scene.camera) this.scene.camera.impulseShake(12, 400);
     this.scene.time.delayedCall(1400, () => {
@@ -510,7 +522,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.setAlpha(1);
     this.invulnUntil = this.scene.time.now + 800;
     this.state = STATE.IDLE;
-    this.anims.play('hero-idle', true);
+    if (this.anims.exists('hero-idle')) {
+      this.anims.play('hero-idle', true);
+    }
   }
 
   // ------------------------------------------------------------ shadow energy
