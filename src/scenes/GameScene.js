@@ -467,6 +467,20 @@ export default class GameScene extends Phaser.Scene {
   // ---------------------------------------------------------- per-frame
   _lateUpdate(time, delta) {
     if (!this.player) return;
+
+    // Safety net: if player falls below the world, respawn them at checkpoint
+    // or spawn point. This prevents the "stuck falling forever" freeze.
+    if (!this.player.dead && this.player.y > (this.levelData.height * TILE) + 200) {
+      const cp = SaveSystem.getCheckpoint();
+      if (cp && cp.levelId === this.levelId) {
+        this.player.respawn(cp.x, cp.y);
+      } else {
+        this.player.respawn(this.levelData.spawn.x, this.levelData.spawn.y);
+      }
+      this.player.health = Math.max(1, this.player.health - 1);
+      this.hud.setHealth(this.player.health);
+    }
+
     // HUD sync
     this.hud.setHealth(this.player.health);
     this.hud.setShadowEnergy(this.player.shadowEnergy / PHYSICS.shadowEnergyMax);

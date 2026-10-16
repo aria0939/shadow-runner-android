@@ -5,6 +5,7 @@
 
 import Phaser from 'phaser';
 import { GAME, SCENES } from './config/constants.js';
+import AudioSystem from './systems/AudioSystem.js';
 
 import BootScene          from './scenes/BootScene.js';
 import PreloadScene       from './scenes/PreloadScene.js';
@@ -28,7 +29,10 @@ const config = {
   antialiasGL: false,
   powerPreference: 'high-performance',
   scale: {
-    mode: Phaser.Scale.FIT,
+    // RESIZE mode: the canvas fills the entire screen (no black bars).
+    // The game adapts to the device's actual aspect ratio. Scenes must use
+    // this.scale.width / this.scale.height for positioning (they already do).
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME.WIDTH,
     height: GAME.HEIGHT,
@@ -76,9 +80,14 @@ RotateHint.init();
 // Make game accessible for debugging in dev tools.
 if (typeof window !== 'undefined') {
   window.SHADOW_RUNNER = game;
+  window.SHADOW_RUNNER_AUDIO = AudioSystem;
 }
 
 // Listen for app pause/resume — important for Capacitor on Android.
+// NOTE: We do NOT pause on window 'blur' because on Android WebView a touch
+// release can fire a brief blur event, which would immediately pause the
+// game right after the user taps "Start Game". We only pause on actual
+// visibility change (tab switch / app background).
 function pauseGame() {
   const active = game.scene.getScenes(true)[0];
   if (active && active.scene.key === SCENES.GAME) {
@@ -88,13 +97,16 @@ function pauseGame() {
 }
 function resumeGame() {
   // AudioContext is automatically resumed on user gesture in AudioSystem.
+  // Try to resume if it was suspended.
+  if (window.SHADOW_RUNNER_AUDIO) window.SHADOW_RUNNER_AUDIO.resume();
 }
 
+// Only pause when the page becomes actually hidden (app backgrounded).
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) pauseGame();
   else resumeGame();
 });
-window.addEventListener('blur', pauseGame);
+// pagehide is fired when the user navigates away or app is backgrounded.
 window.addEventListener('pagehide', pauseGame);
 
 // Prevent right-click context menu on canvas (mobile long-press).

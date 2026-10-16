@@ -123,7 +123,13 @@ export default class MainMenuScene extends Phaser.Scene {
     txt.on('pointerout',  () => { txt.setScale(1.0);  txt.setColor('#e7e7ef'); });
     txt.on('pointerdown', () => {
       AudioSystem.play('menuSelect');
-      this.tweens.add({ targets: txt, scale: 0.95, duration: 60, yoyo: true, onComplete: action });
+      // Visual feedback: quick scale-down then trigger action directly.
+      // We do NOT wait for a tween to complete before transitioning scenes,
+      // because the tween manager is destroyed when the scene shuts down,
+      // which could cause the transition to never fire.
+      this.tweens.add({ targets: txt, scale: 0.95, duration: 50, yoyo: true });
+      // Call the action on the next tick so the visual feedback shows briefly.
+      this.time.delayedCall(60, action);
     });
   }
 

@@ -102,6 +102,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
     if (this.input === null) return;
+    // Keep body offset in sync with the current animation frame every tick.
+    // This is cheap and guarantees the body stays anchored to the hero's feet
+    // across all animation states (frame dimensions vary per state).
+    this._syncBodyOffset();
     // Hit-stop check
     if (this.scene.combat && this.scene.combat.isFrozen()) {
       // Pause physics during hit-stop
@@ -310,9 +314,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.state = next;
       const key = heroAnimKey(next);
       this.anims.play(key, true);
-      // Recompute body offset so the body stays anchored to the hero's feet
-      // within the new animation's (potentially different) frame dimensions.
-      this._syncBodyOffset();
+      // _syncBodyOffset() is called every tick in update(), so the body
+      // will re-anchor on the next frame once the new animation's first
+      // frame becomes current.
     }
 
     // Hit flicker
@@ -331,11 +335,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   // Recompute the body's offset so the body sits at the bottom-center of the
-  // hero's current animation frame. Called whenever the animation state
-  // changes — within a single animation all frames share the same dimensions
-  // (guaranteed by scripts/process_assets.py).
+  // hero's current animation frame. Should be called AFTER the animation has
+  // actually switched (i.e., on the frame after anims.play()).
   _syncBodyOffset() {
-    const frame = this.anims && this.anims.currentFrame ? this.anims.currentFrame.frame : this.frame;
+    const frame = this.anims && this.anims.currentFrame
+      ? this.anims.currentFrame.frame
+      : this.frame;
     if (!frame) return;
     const fw = frame.width;
     const fh = frame.height;

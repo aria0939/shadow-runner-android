@@ -19,6 +19,14 @@ export default class TouchControls {
 
     this._build();
     this._updateOpacity();
+
+    // Rebuild on resize (Scale.RESIZE mode changes canvas size dynamically).
+    this._resizeHandler = this.scene.scale.on('resize', () => {
+      this.destroy();
+      this.buttons = {};
+      this._build();
+      this._updateOpacity();
+    });
   }
 
   _build() {

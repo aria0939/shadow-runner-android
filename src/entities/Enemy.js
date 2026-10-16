@@ -38,12 +38,22 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Wall turn
     if (this.body.blocked.left)  this.facing = 1;
     if (this.body.blocked.right) this.facing = -1;
-    // Ledge detection (optional)
+    // Ledge detection: check if there's solid ground ahead by sampling the
+    // static group's children. We avoid tilemap-specific APIs since solids
+    // is a static group of individual tile sprites, not a tilemap layer.
     if (this.ledgeDetect) {
-      const ahead = this.x + this.facing * (this.body.width / 2 + 6);
-      const footY = this.y + 4;
-      const tiles = this.scene.solids?.getTilesWithinWorldXY(ahead - 4, footY, 8, 6);
-      if (tiles && tiles.length === 0) this.facing *= -1;
+      const ahead = this.x + this.facing * (this.body.width / 2 + 12);
+      const footY = this.y + 8;
+      let groundAhead = false;
+      const children = this.scene.solids.getChildren();
+      for (let i = 0; i < children.length; i++) {
+        const s = children[i];
+        if (Math.abs(s.y - footY) < 40 && Math.abs(s.x - ahead) < 48) {
+          groundAhead = true;
+          break;
+        }
+      }
+      if (!groundAhead) this.facing *= -1;
     }
   }
 
