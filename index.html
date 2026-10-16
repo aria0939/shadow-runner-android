@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#0a0a14" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-orientation" content="landscape" />
+  <meta name="screen-orientation" content="landscape" />
+  <meta name="x5-orientation" content="landscape" />
+  <meta name="fullscreen" content="yes" />
+  <meta name="x5-fullscreen" content="true" />
+  <title>Shadow Runner: Pixel Adventure</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #05060a;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+      color: #e7e7ef;
+    }
+    #game-root {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #05060a;
+    }
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      -ms-interpolation-mode: nearest-neighbor;
+    }
+    /* Boot loader shown before Phaser is ready */
+    #boot-loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: radial-gradient(ellipse at center, #14162a 0%, #05060a 80%);
+      color: #b8b8d0;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      z-index: 10;
+    }
+    #boot-loader .title {
+      font-size: 22px;
+      letter-spacing: 0.32em;
+      color: #e7e7ef;
+      text-shadow: 0 0 18px rgba(122, 86, 255, 0.6);
+    }
+    #boot-loader .bar {
+      width: 220px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #boot-loader .bar > i {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #6a4cff, #b5a3ff);
+      animation: load 1.4s ease-in-out infinite;
+    }
+    @keyframes load {
+      0%   { width: 0%;   margin-left: 0; }
+      50%  { width: 70%;  margin-left: 15%; }
+      100% { width: 0%;   margin-left: 100%; }
+    }
+    .hidden { display: none !important; }
+    /* Rotate hint overlay shown if portrait detected */
+    #rotate-hint {
+      position: fixed;
+      inset: 0;
+      background: #05060a;
+      color: #e7e7ef;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 50;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 14px;
+      text-align: center;
+      padding: 24px;
+    }
+    #rotate-hint .phone {
+      width: 56px;
+      height: 100px;
+      border: 3px solid #b5a3ff;
+      border-radius: 10px;
+      animation: rotate 2.2s ease-in-out infinite;
+    }
+    @keyframes rotate {
+      0%, 40%   { transform: rotate(0deg); }
+      60%, 100% { transform: rotate(-90deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-root"></div>
+
+  <div id="boot-loader">
+    <div class="title">Shadow Runner</div>
+    <div>Pixel Adventure</div>
+    <div class="bar"><i></i></div>
+    <div>Loading shadow energy…</div>
+  </div>
+
+  <div id="rotate-hint">
+    <div class="phone"></div>
+    <div>Rotate your device</div>
+    <div style="opacity:0.6">Landscape orientation required</div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
