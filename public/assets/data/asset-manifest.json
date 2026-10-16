@@ -1,0 +1,390 @@
+{
+  "hero": {
+    "idle": {
+      "frameWidth": 206,
+      "frameHeight": 280,
+      "count": 8
+    },
+    "walk": {
+      "frameWidth": 222,
+      "frameHeight": 295,
+      "count": 8
+    },
+    "run": {
+      "frameWidth": 191,
+      "frameHeight": 157,
+      "count": 8
+    },
+    "jump": {
+      "frameWidth": 211,
+      "frameHeight": 267,
+      "count": 4
+    },
+    "fall": {
+      "frameWidth": 244,
+      "frameHeight": 299,
+      "count": 4
+    },
+    "crouch-hit": {
+      "frameWidth": 217,
+      "frameHeight": 298,
+      "count": 4
+    },
+    "death": {
+      "frameWidth": 324,
+      "frameHeight": 243,
+      "count": 4
+    }
+  },
+  "enemies": {
+    "walker": {
+      "frameWidth": 252,
+      "frameHeight": 147,
+      "count": 4
+    },
+    "shell-crawler": {
+      "frameWidth": 286,
+      "frameHeight": 229,
+      "count": 4
+    },
+    "flying-shadow": {
+      "frameWidth": 333,
+      "frameHeight": 256,
+      "count": 4
+    },
+    "shadow-hunter": {
+      "frameWidth": 369,
+      "frameHeight": 222,
+      "count": 4
+    }
+  },
+  "tiles": {
+    "tile-01.png": {
+      "size": [
+        217,
+        224
+      ]
+    },
+    "tile-02.png": {
+      "size": [
+        162,
+        223
+      ]
+    },
+    "tile-03.png": {
+      "size": [
+        159,
+        223
+      ]
+    },
+    "tile-04.png": {
+      "size": [
+        219,
+        221
+      ]
+    },
+    "tile-05.png": {
+      "size": [
+        221,
+        221
+      ]
+    },
+    "tile-06.png": {
+      "size": [
+        208,
+        223
+      ]
+    },
+    "tile-07.png": {
+      "size": [
+        211,
+        225
+      ]
+    },
+    "tile-08.png": {
+      "size": [
+        210,
+        227
+      ]
+    },
+    "tile-09.png": {
+      "size": [
+        196,
+        188
+      ]
+    },
+    "tile-10.png": {
+      "size": [
+        219,
+        189
+      ]
+    },
+    "tile-11.png": {
+      "size": [
+        194,
+        185
+      ]
+    },
+    "tile-12.png": {
+      "size": [
+        196,
+        185
+      ]
+    },
+    "tile-13.png": {
+      "size": [
+        299,
+        202
+      ]
+    },
+    "tile-14.png": {
+      "size": [
+        334,
+        171
+      ]
+    },
+    "tile-15.png": {
+      "size": [
+        339,
+        159
+      ]
+    },
+    "tile-16.png": {
+      "size": [
+        366,
+        130
+      ]
+    }
+  },
+  "pickups": {
+    "pickup-00.png": {
+      "size": [
+        80,
+        150
+      ]
+    },
+    "pickup-01.png": {
+      "size": [
+        102,
+        151
+      ]
+    },
+    "pickup-02.png": {
+      "size": [
+        144,
+        149
+      ]
+    },
+    "pickup-03.png": {
+      "size": [
+        113,
+        149
+      ]
+    },
+    "pickup-04.png": {
+      "size": [
+        80,
+        155
+      ]
+    },
+    "pickup-05.png": {
+      "size": [
+        76,
+        133
+      ]
+    },
+    "pickup-06.png": {
+      "size": [
+        66,
+        123
+      ]
+    },
+    "pickup-07.png": {
+      "size": [
+        53,
+        103
+      ]
+    },
+    "pickup-08.png": {
+      "size": [
+        34,
+        60
+      ]
+    },
+    "pickup-09.png": {
+      "size": [
+        31,
+        66
+      ]
+    },
+    "pickup-10.png": {
+      "size": [
+        25,
+        41
+      ]
+    },
+    "pickup-11.png": {
+      "size": [
+        164,
+        198
+      ]
+    },
+    "pickup-12.png": {
+      "size": [
+        177,
+        179
+      ]
+    },
+    "pickup-13.png": {
+      "size": [
+        165,
+        177
+      ]
+    },
+    "pickup-14.png": {
+      "size": [
+        198,
+        144
+      ]
+    },
+    "pickup-15.png": {
+      "size": [
+        25,
+        25
+      ]
+    },
+    "pickup-16.png": {
+      "size": [
+        71,
+        82
+      ]
+    },
+    "pickup-17.png": {
+      "size": [
+        35,
+        35
+      ]
+    },
+    "pickup-18.png": {
+      "size": [
+        29,
+        29
+      ]
+    },
+    "pickup-19.png": {
+      "size": [
+        33,
+        32
+      ]
+    },
+    "pickup-20.png": {
+      "size": [
+        208,
+        119
+      ]
+    },
+    "pickup-21.png": {
+      "size": [
+        211,
+        116
+      ]
+    },
+    "pickup-22.png": {
+      "size": [
+        29,
+        31
+      ]
+    },
+    "pickup-23.png": {
+      "size": [
+        176,
+        93
+      ]
+    },
+    "pickup-24.png": {
+      "size": [
+        33,
+        32
+      ]
+    },
+    "pickup-25.png": {
+      "size": [
+        38,
+        41
+      ]
+    },
+    "pickup-26.png": {
+      "size": [
+        25,
+        26
+      ]
+    },
+    "pickup-27.png": {
+      "size": [
+        32,
+        31
+      ]
+    },
+    "pickup-28.png": {
+      "size": [
+        33,
+        32
+      ]
+    },
+    "pickup-29.png": {
+      "size": [
+        24,
+        25
+      ]
+    },
+    "pickup-30.png": {
+      "size": [
+        26,
+        26
+      ]
+    },
+    "pickup-31.png": {
+      "size": [
+        28,
+        29
+      ]
+    },
+    "pickup-32.png": {
+      "size": [
+        24,
+        25
+      ]
+    },
+    "pickup-33.png": {
+      "size": [
+        301,
+        135
+      ]
+    },
+    "pickup-34.png": {
+      "size": [
+        325,
+        127
+      ]
+    },
+    "pickup-35.png": {
+      "size": [
+        44,
+        25
+      ]
+    },
+    "pickup-36.png": {
+      "size": [
+        192,
+        85
+      ]
+    },
+    "pickup-37.png": {
+      "size": [
+        123,
+        39
+      ]
+    }
+  },
+  "background": "backgrounds/green-valley-parallax.png"
+}
