@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Shadow Runner</string>
+    <string name="title_activity_main">Shadow Runner</string>
+    <string name="package_name">com.aria.shadowrunner</string>
+    <string name="custom_url_scheme">com.aria.shadowrunner</string>
+</resources>
